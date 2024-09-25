@@ -110,7 +110,7 @@ mse_overall = (mse_R + mse_G + mse_B) / 3;
 fprintf('Mean Squared Error (MSE) for Red channel: %.4f\n', mse_R);
 fprintf('Mean Squared Error (MSE) for Green channel: %.4f\n', mse_G);
 fprintf('Mean Squared Error (MSE) for Blue channel: %.4f\n', mse_B);
-fprintf('Overall Mean Squared Error (MSE): %.4f\n', mse_overall);
+fprintf('Overall Mean Squared Error (MSE): %.4f\n\n', mse_overall);
 
 total_pixels = M * N;
 
