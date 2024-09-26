@@ -1,3 +1,4 @@
+cd('/Users/antonio/Library/Mobile Documents/com~apple~CloudDocs/Downloads/HW1');
 rgbImage = imread ('Image File_Watertfall.jpg', 'jpg');
 
 Red = rgbImage(:,:,1);
@@ -117,7 +118,7 @@ total_pixels = M * N;
 % Y component stays the same
 Y_samples = total_pixels; 
 % Cb component samples (W/2 x H/2)
-Cb_samples = (M/2) * (N/2); 
+Cb_samples = (M/2) * (N/2);
 % Cr component samples (W/2 x H/2)
 Cr_samples = (M/2) * (N/2); 
 
