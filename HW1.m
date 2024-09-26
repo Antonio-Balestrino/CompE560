@@ -1,4 +1,5 @@
-rgbImage = imread ('Image File_Watertfall.jpg', 'jpg');
+%%% Problem 1
+rgbImage = imread ('Waterfall.jpg', 'jpg');
 
 Red = rgbImage(:,:,1);
 Green = rgbImage(:,:,2);
@@ -6,12 +7,13 @@ Blue = rgbImage(:,:,3);
  
 zeroMatrix = zeros(480, 640, 'uint8'); 
 
+figure;
+imshow(rgbImage);
+
+%%% Probelem 2
 redImage = cat(3, Red, zeroMatrix, zeroMatrix);
 greenImage = cat(3, zeroMatrix, Green, zeroMatrix);
 blueImage = cat(3, zeroMatrix, zeroMatrix, Blue);
-
-figure;
-imshow(rgbImage);
 
 figure;
 imshow(redImage);
@@ -22,12 +24,14 @@ imshow(greenImage);
 figure;
 imshow(blueImage);
 
+%%% Problem 3
 ycbcr = rgb2ycbcr(rgbImage);
 
 Y = ycbcr(:,:,1);
 Cb = ycbcr(:,:,2);
 Cr = ycbcr(:,:,3);
 
+%%% Problem 4
 figure;
 imshow(Y);
  
@@ -37,6 +41,7 @@ imshow(Cb);
 figure;
 imshow(Cr);
 
+%%% Problem 5
 Cb_subsample = zeros(240, 320, 'uint8');  
 Cr_subsample = zeros(240, 320, 'uint8');
 
@@ -53,6 +58,7 @@ imshow(Cb_subsample);
 figure;
 imshow(Cr_subsample);
 
+%%% Problem 6
 Cb_upsample = zeros(480, 640, 'uint8');
 Cr_upsample = zeros(480, 640, 'uint8');
 
@@ -69,13 +75,14 @@ imshow(Cb_upsample);
 figure;
 imshow(Cr_upsample);
 
+%%% Problem 7
 ycbcr_new = cat(3, Y, Cb_upsample, Cr_upsample);
 rgb_new = ycbcr2rgb(ycbcr_new);
 
 figure;
 imshow(rgb_new);
 
-
+%%% Problem 8
 figure;
 subplot(1, 2, 1);
 imshow(rgbImage);
@@ -85,6 +92,11 @@ subplot(1, 2, 2);
 imshow(rgb_new);   
 title('Reconstructed Image');
 
+%%% Problem 9
+%   The two images look identical to the human eye and it is very hard to 
+%   spot any differences between the two images
+%
+%%% Problem 10
 original_image = double(rgbImage);
 reconstructed_image = double(rgb_new);
 
@@ -112,17 +124,16 @@ fprintf('Mean Squared Error (MSE) for Green channel: %.4f\n', mse_G);
 fprintf('Mean Squared Error (MSE) for Blue channel: %.4f\n', mse_B);
 fprintf('Overall Mean Squared Error (MSE): %.4f\n\n', mse_overall);
 
+
+%%% Problem 11
 total_pixels = M * N;
 
-% Y component stays the same
 Y_samples = total_pixels; 
-% Cb component samples (W/2 x H/2)
 Cb_samples = (M/2) * (N/2);
-% Cr component samples (W/2 x H/2)
 Cr_samples = (M/2) * (N/2); 
 
 total_samples_subsampled = Y_samples + Cb_samples + Cr_samples;
-original_total_samples = total_pixels * 3;  % Each component (Y, Cb, Cr) has original pixel count
+original_total_samples = total_pixels * 3;
 
 compression_ratio = original_total_samples / total_samples_subsampled;
 
