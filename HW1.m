@@ -1,4 +1,3 @@
-cd('/Users/antonio/Library/Mobile Documents/com~apple~CloudDocs/Downloads/HW1');
 rgbImage = imread ('Image File_Watertfall.jpg', 'jpg');
 
 Red = rgbImage(:,:,1);
