@@ -19,7 +19,8 @@ block_row = 6;              % We are analyzing the 6th row
 start_row = (block_row - 1) * block_size + 1;
 
 % Convert Y to double and apply DC shift
-Y_shifted = double(Y) - 128;
+Y_original = double(Y);        % Preserve original Y for later
+Y_shifted = Y_original - 128;  % Apply DC shift
 
 % Extract two blocks from the 6th row using shifted Y
 Y_block1 = Y_shifted(start_row:start_row+block_size-1, 1:block_size);
@@ -250,6 +251,7 @@ YCbCr_Reconstructed_uint8 = uint8(YCbCr_Reconstructed);
 
 RGB_Reconstructed = ycbcr2rgb(YCbCr_Reconstructed_uint8);
 
+figure
 subplot(1, 2, 1); 
 imshow(rgbImage);
 title('Original RGB Image');
@@ -257,8 +259,6 @@ title('Original RGB Image');
 subplot(1, 2, 2);
 imshow(RGB_Reconstructed);
 title('Reconstructed RGB Image');
-
-Y_original = double(Y); 
 
 % Compute the Error Image
 Error_Image_Y = Y_original - Reconstructed_Y;
