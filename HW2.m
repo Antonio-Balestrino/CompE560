@@ -18,9 +18,12 @@ block_size = 8;             % 8x8 blocks
 block_row = 6;              % We are analyzing the 6th row
 start_row = (block_row - 1) * block_size + 1;
 
-% Extract two blocks from the 6th row
-Y_block1 = Y(start_row:start_row+block_size-1, 1:block_size);
-Y_block2 = Y(start_row:start_row+block_size-1, block_size+1:2*block_size);
+% Convert Y to double and apply DC shift
+Y_shifted = double(Y) - 128;
+
+% Extract two blocks from the 6th row using shifted Y
+Y_block1 = Y_shifted(start_row:start_row+block_size-1, 1:block_size);
+Y_block2 = Y_shifted(start_row:start_row+block_size-1, block_size+1:2*block_size);
 
 % Apply 2D DCT to these blocks
 DCT_block1 = dct2(Y_block1);
@@ -44,35 +47,37 @@ imshow(log(abs(DCT_block2) + 1), []);  % Enhance visibility using log scale
 title('DCT of 2nd block, 6th row');
 
 
-
-
 %%%
 %%% PROBLEM (B)
 %%%
 
+block_size = 8;
 
-block_size = 8; 
-num_blocks = 2; % We want only the first two blocks
+[num_block_rows, num_block_cols] = size(Y);
+num_block_rows = num_block_rows / block_size;
+num_block_cols = num_block_cols / block_size;
 
 dctY = zeros(size(Y));
 dctCb = zeros(size(Cb));
 dctCr = zeros(size(Cr));
 
-for block_num = 0:num_blocks-1
-    row_start = (6 - 1) * block_size; % Start at row 5 for block 6
-    col_start = block_num * block_size; % Starting column for each block
-    
-    % DCT for Y
-    dctY(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) = ...
-        dct2(Y(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size));
-    
-    % DCT for Cb
-    dctCb(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) = ...
-        dct2(Cb(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size));
-    
-    % DCT for Cr
-    dctCr(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) = ...
-        dct2(Cr(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size));
+for block_row = 0:num_block_rows-1
+    for block_col = 0:num_block_cols-1
+        row_start = block_row * block_size;
+        col_start = block_col * block_size;
+        
+        % DCT for Y_shifted
+        dctY(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) = ...
+            dct2(Y_shifted(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size));
+        
+        % DCT for Cb
+        dctCb(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) = ...
+            dct2(Cb(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size));
+        
+        % DCT for Cr
+        dctCr(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) = ...
+            dct2(Cr(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size));
+    end
 end
 
 %  Quantization matrices
@@ -103,25 +108,28 @@ Quantized_Y = zeros(size(Y));
 Quantized_Cb = zeros(size(Cb));
 Quantized_Cr = zeros(size(Cr));
 
-for block_num = 0:num_blocks-1
-    row_start = (6 - 1) * block_size; 
-    col_start = block_num * block_size; 
-    
-    % Quantize Y
-    block_Y = dctY(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size);
-    Quantized_Y(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) = ...
-        round(block_Y ./ QY);
-    
-    % Quantize Cb
-    block_Cb = dctCb(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size);
-    Quantized_Cb(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) = ...
-        round(block_Cb ./ QCb);
-    
-    % Quantize Cr
-    block_Cr = dctCr(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size);
-    Quantized_Cr(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) = ...
-        round(block_Cr ./ QCb); % Use QCb for Cr
+for block_row = 0:num_block_rows-1
+    for block_col = 0:num_block_cols-1
+        row_start = block_row * block_size;
+        col_start = block_col * block_size;
+        
+        % Quantize Y
+        block_Y = dctY(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size);
+        Quantized_Y(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) = ...
+            round(block_Y ./ QY);
+        
+        % Quantize Cb
+        block_Cb = dctCb(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size);
+        Quantized_Cb(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) = ...
+            round(block_Cb ./ QCb);
+        
+        % Quantize Cr
+        block_Cr = dctCr(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size);
+        Quantized_Cr(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) = ...
+            round(block_Cr ./ QCb); % Using QCb for Cr as in original code
+    end
 end
+
 
 %  Get DC coefficients for both blocks in row 6
 DC_Y_1 = Quantized_Y((6 - 1) * block_size + 1, 1); % DC for Block 1
@@ -175,3 +183,93 @@ disp(AC_Y_1);
 
 disp('AC DCT coefficients for Y Block 2 (6th row):');
 disp(AC_Y_2);
+
+
+%%%
+%%% PROBLEM (C)
+%%%
+
+InvQuantized_Y = zeros(size(Y));
+InvQuantized_Cb = zeros(size(Cb));
+InvQuantized_Cr = zeros(size(Cr));
+
+for block_row = 0:num_block_rows-1
+    for block_col = 0:num_block_cols-1
+        row_start = block_row * block_size;
+        col_start = block_col * block_size;
+        
+        % Inverse Quantize Y
+        InvQuantized_Y(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) = ...
+            Quantized_Y(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) .* QY;
+        
+        % Inverse Quantize Cb
+        InvQuantized_Cb(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) = ...
+            Quantized_Cb(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) .* QCb;
+        
+        % Inverse Quantize Cr
+        InvQuantized_Cr(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) = ...
+            Quantized_Cr(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) .* QCb; % Using QCb for Cr as in original code
+    end
+end
+
+
+%%%
+%%% PROBLEM (D)
+%%%
+
+Reconstructed_Y = zeros(size(Y));
+Reconstructed_Cb = zeros(size(Cb));
+Reconstructed_Cr = zeros(size(Cr));
+
+for block_row = 0:num_block_rows-1
+    for block_col = 0:num_block_cols-1
+        row_start = block_row * block_size;
+        col_start = block_col * block_size;
+        
+        % Inverse DCT for Y and apply DC shift back
+        Reconstructed_Y_block = idct2(InvQuantized_Y(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size)) + 128;
+        Reconstructed_Y(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) = Reconstructed_Y_block;
+        
+        % Inverse DCT for Cb
+        Reconstructed_Cb_block = idct2(InvQuantized_Cb(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size));
+        Reconstructed_Cb(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) = Reconstructed_Cb_block;
+        
+        % Inverse DCT for Cr
+        Reconstructed_Cr_block = idct2(InvQuantized_Cr(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size));
+        Reconstructed_Cr(row_start + 1:row_start + block_size, col_start + 1:col_start + block_size) = Reconstructed_Cr_block;
+    end
+end
+
+Reconstructed_Y = max(min(Reconstructed_Y, 235), 16);
+Reconstructed_Cb = max(min(Reconstructed_Cb, 240), 16);
+Reconstructed_Cr = max(min(Reconstructed_Cr, 240), 16);
+
+% Convert to uint8 for proper image representation
+YCbCr_Reconstructed = cat(3, Reconstructed_Y, Reconstructed_Cb, Reconstructed_Cr);
+YCbCr_Reconstructed_uint8 = uint8(YCbCr_Reconstructed);
+
+RGB_Reconstructed = ycbcr2rgb(YCbCr_Reconstructed_uint8);
+
+subplot(1, 2, 1); 
+imshow(rgbImage);
+title('Original RGB Image');
+
+subplot(1, 2, 2);
+imshow(RGB_Reconstructed);
+title('Reconstructed RGB Image');
+
+Y_original = double(Y); 
+
+% Compute the Error Image
+Error_Image_Y = Y_original - Reconstructed_Y;
+
+figure;
+abs_Error_Image_Y = abs(Error_Image_Y);
+imshow(abs_Error_Image_Y, []);
+title('Error Image for Luminance Component');
+
+% Calculate PSNR for Luminance
+MAX_I = 255;
+MSE_Y = mean((double(Y_original(:)) - double(Reconstructed_Y(:))).^2);
+PSNR_Y = 10 * log10((MAX_I^2) / MSE_Y);
+fprintf('PSNR for Luminance (Y) Component: %.2f dB\n', PSNR_Y);
